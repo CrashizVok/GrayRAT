@@ -1,28 +1,23 @@
 import socket
-import threading
+import subprocess
 
-# Set up the server
-def start_server():
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    server.bind(('localhost', 8080))
-    server.listen(5)
-    print('Server is listening...')
+def connect_to_server():
+    while True:
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            s.connect(('localhost', 8080))
+            break
+        except ConnectionRefusedError:
+            pass
 
     while True:
-        client, addr = server.accept()
-        print('Client connected:', addr)
+        command = input('Enter a command: ')
+        s.sendall(command.encode())
 
-        # Create a new thread for the connection
-        thread = threading.Thread(target=handle_client, args=(client,))
-        thread.start()
-
-def handle_client(client):
-    while True:
-        data = client.recv(1024)
-        if not data:
+        if command.lower() == 'exit':
             break
 
-        print('Received:', data)
+    s.close()
 
 if __name__ == '__main__':
-    start_server()
+    connect_to_server()
